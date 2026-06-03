@@ -7,6 +7,9 @@ from scoring import build_prompt  # not strictly needed in main, but fine
 from parsing import get_scores
 from models import ScoreResult
 
+from models import ScoreResult, Tier, Application
+from datetime import datetime
+
 from db import init_db, SessionLocal
 from extract import extract_text
 from eligibility import check_eligibility
@@ -47,12 +50,16 @@ def run(args) -> dict:
     with SessionLocal() as session:
         rejection = check_eligibility(session, args.candidate_id, args.job_id)
         if rejection is not None:
-            # mode="json" turns the date into an ISO string automatically
-            return rejection.model_dump(mode="json")
-
-        # 3. Score (stub for now)
-        rejection = check_eligibility(session, args.candidate_id, args.job_id)
-        if rejection is not None:
+            # Persist the rejected attempt as a record of this application
+            session.add(Application(
+                candidate_id=args.candidate_id,
+                job_id=args.job_id,
+                status="rejected",
+                decision_date=datetime.now(),
+                score=None,
+                tier=None,
+            ))
+            session.commit()
             return rejection.model_dump(mode="json")
 
         # 3. Score with the local LLM
@@ -74,6 +81,18 @@ def run(args) -> dict:
             tier=score_to_tier(final),
             rationale=raw.rationale,
         )
+
+        # 4. Persist the scored result
+        session.add(Application(
+            candidate_id=args.candidate_id,
+            job_id=args.job_id,
+            status="scored",
+            decision_date=datetime.now(),
+            score=result.score,
+            tier=result.tier.value,
+        ))
+        session.commit()
+
         return result.model_dump(mode="json")
 
 
