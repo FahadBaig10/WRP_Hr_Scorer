@@ -1,0 +1,6 @@
+pdfplumber
+sqlalchemy
+pydantic
+python-dotenv
+ollama
+python-dateutil
