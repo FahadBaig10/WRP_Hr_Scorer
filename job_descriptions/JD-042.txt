@@ -1,0 +1,40 @@
+Job ID: JD-042
+Title: AI Engineer
+Location: Karachi (Hybrid)
+Experience Level: 2-4 years
+
+About the Role:
+We are hiring an AI Engineer to build and maintain machine learning
+services that power our internal products. You will work across the full
+lifecycle — from prototyping models to deploying reliable, production-grade
+inference services. We value clean engineering, sound judgment, and the
+ability to ship small, complete features rather than large unfinished ones.
+
+Responsibilities:
+- Design and build backend AI services in Python.
+- Integrate large language models into applications, including locally
+  hosted open-source models.
+- Write clean, well-tested, maintainable code with clear documentation.
+- Work with databases (SQL) to store and retrieve application data.
+- Handle unreliable model output safely: validation, parsing, and graceful
+  failure handling.
+- Collaborate with the team to scope features and explain technical
+  trade-offs.
+
+Required Skills:
+- Strong Python (3.10+), including virtual environments and packaging.
+- Practical experience with at least one ML or LLM framework.
+- Experience working with REST APIs and/or command-line tools.
+- Familiarity with SQL databases (SQLite, PostgreSQL, or similar).
+- Comfortable with Git and standard version-control workflows.
+
+Nice to Have:
+- Experience running local LLMs (Ollama, llama.cpp, or similar).
+- Exposure to retrieval-augmented generation (RAG) or vector databases.
+- Unit testing experience (pytest).
+- Familiarity with data validation libraries (e.g. Pydantic).
+
+What We Value:
+- Clear reasoning and reliable, well-structured output.
+- The ability to scope work sensibly and defend design decisions.
+- A bias toward simple, complete solutions over feature breadth.

@@ -2,6 +2,11 @@ import argparse
 import json
 import sys
 
+import os
+from scoring import build_prompt  # not strictly needed in main, but fine
+from parsing import get_scores
+from models import ScoreResult
+
 from db import init_db, SessionLocal
 from extract import extract_text
 from eligibility import check_eligibility
@@ -12,34 +17,12 @@ def parse_bool(value: str) -> bool:
     """Turn a CLI string like 'true'/'false' into a real bool."""
     return str(value).strip().lower() in ("true", "1", "yes")
 
-
-def stub_score(cv_text: str, candidate_id: str, job_id: str,
-               referred: bool) -> ScoreResult:
-    """Placeholder scorer. Replaced by the real Ollama call in Step 7.
-
-    Returns raw per-dimension scores, applies the referral boost and tier
-    mapping deterministically — exactly where the real logic will live.
-    """
-    qualifications = 70
-    experience = 72
-    achievements = 68
-    culture_fit = 74
-
-    raw = (qualifications + experience + achievements + culture_fit) / 4
-    final = raw + (10 if referred else 0)
-    final = min(final, 100)  # don't let the boost exceed 100
-
-    return ScoreResult(
-        candidate_id=candidate_id,
-        job_id=job_id,
-        qualifications=qualifications,
-        experience=experience,
-        achievements=achievements,
-        culture_fit=culture_fit,
-        score=round(final, 2),
-        tier=score_to_tier(final),
-        rationale="Stub scorer — replace with Ollama in Step 7.",
-    )
+def load_job_description(job_id: str) -> str:
+    path = os.path.join("job_descriptions", f"{job_id}.txt")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Job description not found: {path}")
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
 
 
 def score_to_tier(score: float) -> Tier:
@@ -68,7 +51,29 @@ def run(args) -> dict:
             return rejection.model_dump(mode="json")
 
         # 3. Score (stub for now)
-        result = stub_score(cv_text, args.candidate_id, args.job_id, referred)
+        rejection = check_eligibility(session, args.candidate_id, args.job_id)
+        if rejection is not None:
+            return rejection.model_dump(mode="json")
+
+        # 3. Score with the local LLM
+        job_description = load_job_description(args.job_id)
+        raw = get_scores(cv_text, job_description)
+
+        base = (raw.qualifications + raw.experience
+                + raw.achievements + raw.culture_fit) / 4
+        final = min(base + (10 if referred else 0), 100)
+
+        result = ScoreResult(
+            candidate_id=args.candidate_id,
+            job_id=args.job_id,
+            qualifications=raw.qualifications,
+            experience=raw.experience,
+            achievements=raw.achievements,
+            culture_fit=raw.culture_fit,
+            score=round(final, 2),
+            tier=score_to_tier(final),
+            rationale=raw.rationale,
+        )
         return result.model_dump(mode="json")
 
 
