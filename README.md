@@ -172,4 +172,4 @@ no-prior-rejection case, and the earliest re-application date calculation.
 
 ## Time Spent
 
-Approximately [FILL IN — e.g. "4~5 hours setup and core, ~1 hour batch module and tests, 10-20 mins README and polish"].
+Approximately "4~5 hours setup and core, ~1 hour batch module and tests, 10-20 mins README and polish". 
